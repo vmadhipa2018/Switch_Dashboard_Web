@@ -1,11 +1,11 @@
 Devices:
-  9200-L:
+  <SWitch-Model>:
     type: ios-xe
-    address: 10.64.71.62
-    username: admin
-    password: C!sco123@bgl11
-  9300-48:
+    address: <IP_address>
+    username: <USERNAME>
+    password: <PASSWORD>
+  <SWITCH-Model>:
     type: ios-xe
-    address: 10.64.71.36
-    username: admin
-    password: C!sco123@bgl11
+    address: <IP_address>
+    username: <USERNAME>
+    password: <PASSWORD>
