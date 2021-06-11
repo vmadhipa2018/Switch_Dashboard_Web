@@ -4,6 +4,7 @@ import struct
 import yaml
 from scrapli.driver.core import IOSXEDriver, NXOSDriver
 import switchdb
+from extract import json_extract
 
 def loadDevices():
     """
@@ -140,7 +141,6 @@ def save_raw_output(data):
         a.write(data.result)
         #print(a)
 
-open("list_ip_300.txt", 'w').close()            ##This will overwrite the file everytime getSystemInfoXE is run and avoids file from overgrowing.
 def getSystemInfoXE(device):
     """
      -- FOR IOS-XE DEVICES --
@@ -156,14 +156,6 @@ def getSystemInfoXE(device):
     global system_serial
     system_serial = sysinfo['serial']
     return sysinfo
-    with open('list_ip_300.txt', 'a') as file:      ## Open/Create the file for saving IP List
-        resp1 = device.send_command("show ip arp")
-        sh_parsed = resp1.genie_parse_output()
-        for vlans_300, ipv4_300 in sh_parsed["interfaces"]["Vlan300"].items():
-            for ip_list_300 in ipv4_300["neighbors"].items():
-                print(ip_list_300[0])
-                file.write(ip_list_300[0])
-                file.write('\n')
 
 def getSystemInfoNX(device):
     """
@@ -180,7 +172,6 @@ def getSystemInfoNX(device):
     global system_serial
     system_serial = sysinfo['serial']
     return sysinfo
-
 
 def addDeviceToDB(devicelist):
     """
@@ -246,6 +237,15 @@ def updateCheckStatus(device, ip, status):
     swDB.updateStatus(device, ip, status)
     swDB.close()
 
+open("list_ip_300.txt", 'w+').close()            ##This will overwrite the file everytime getSystemInfoXE is run and avoids file from overgrowing.
+def usedips(device):
+    with open('list_ip_300.txt', 'a') as file:      ## Open/Create the file for saving IP List
+        resp1 = device.send_command("show ip arp")
+        sh_parsed = resp1.genie_parse_output()
+        ips = json_extract(sh_parsed,'ip')
+        file.write(str(ips))
+        file.write('\n')
+
 def unique_ip_list(filename):               ## Function to print out unique ip list from "Show ip arp" result from all devices
     devicelist = loadDevices()
     for iteration, node in enumerate(devicelist):
@@ -255,10 +255,10 @@ def unique_ip_list(filename):               ## Function to print out unique ip l
         if iteration == len(devicelist):
             with open(filename, 'r') as file:
                 fields1 = file.read().splitlines()
-                #print(fields1)
-                myset = set(fields1)
-                newset = sorted(myset, key=lambda ip: struct.unpack("!L", inet_aton(ip))[0])
-                #print(newset)
+                print(f'Fields IPs are {fields1}')
+                print('\n')
+                # myset = set(fields1)
+                # print(myset)
 
 def run():
     """
@@ -273,6 +273,7 @@ def run():
         ip = devicelist[device]['address']
         # Open device connection
         devcon = connectToDevice(devicelist[device])
+        usedips(devcon)
         if devcon:
             try:
                 # Query device for system & port info
