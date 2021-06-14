@@ -1,10 +1,12 @@
 import os
-from socket import inet_aton
-import struct
 import yaml
 from scrapli.driver.core import IOSXEDriver, NXOSDriver
 import switchdb
+import csv
 from extract import json_extract
+from socket import inet_aton
+import struct
+from itertools import zip_longest
 
 def loadDevices():
     """
@@ -246,19 +248,28 @@ def usedips(device):
         file.write(str(ips))
         file.write('\n')
 
-def unique_ip_list(filename):               ## Function to print out unique ip list from "Show ip arp" result from all devices
-    devicelist = loadDevices()
-    for iteration, node in enumerate(devicelist):
-        device = connectToDevice(devicelist[node])
-        getSystemInfoXE(device)
-        iteration +=1
-        if iteration == len(devicelist):
-            with open(filename, 'r') as file:
-                fields1 = file.read().splitlines()
-                print(f'Fields IPs are {fields1}')
-                print('\n')
-                # myset = set(fields1)
-                # print(myset)
+## Function to print out unique ip list from "Show ip arp" result from all devices
+
+def csv_write(iteration,devicelist):
+    if iteration == len(devicelist):
+        with open('list_ip_300.txt') as file:
+            fields = file.read().split()
+            output = []
+            for each in fields:
+                ip = each.strip("'[]\,")
+                output.append(ip)
+            unique_list = set(output)      #Remove Duplicate IP entries from the list. Since "Sh ip arp" is run on both switches, they might have similar IP entries.
+            sorted_list = sorted(unique_list, key=lambda ip: struct.unpack("!L", inet_aton(ip))[0])  #Sort the IP address in Ascending Order
+            print(f'My sorted list is {sorted_list}')
+        #
+        #Below block of code will write the IP list to CSV file.
+        tmp = [x for x in range(1,(len(sorted_list) + 1))]
+        new_sort = [tmp,sorted_list]
+        export_data = zip_longest(*new_sort, fillvalue='')
+        with open('consumed_ips.csv', 'w', encoding="ISO-8859-1", newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(('Number','IPs Used in Network'))
+            writer.writerows(export_data)
 
 def run():
     """
@@ -268,12 +279,13 @@ def run():
     devicelist = loadDevices()
     addDeviceToDB(devicelist)
     # Iterate through each device for processing
-    for device in devicelist:
+    for iteration, device in enumerate(devicelist):
         dev = device
         ip = devicelist[device]['address']
         # Open device connection
         devcon = connectToDevice(devicelist[device])
         usedips(devcon)
+        iteration +=1
         if devcon:
             try:
                 # Query device for system & port info
@@ -293,9 +305,8 @@ def run():
         else:
             # Update DB if last check failed
             updateCheckStatus(device, ip, False)
-
-
-    unique_ip_list('list_ip_300.txt')
+        #unique_ip_list()
+        csv_write(iteration, devicelist)
    # Finally, update the last-run time!
     updateLastRun()
 
