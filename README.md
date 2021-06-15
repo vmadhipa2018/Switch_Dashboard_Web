@@ -11,6 +11,8 @@ config.yml -- Configuration file to hold all the end device details (device_type
 
 data_collector.py -- Python script that connects to end devices to collect inventory, switchport information, Consumed IP details. This script parses the raw data and saves data   to sqlite database.
 
+extract.py  -- Logic to extract complex nested dictionary data to extract Consumed IP address information from switches.
+
 switchdb.py  --  This script is used to manage sqlite database
 
 switchport_web.py -- Script holding flask front-end web logic to render HTML templates by leveraing information from database and handles inbound user requests as well. 
