@@ -14,3 +14,11 @@ data_collector.py -- Python script that connects to end devices to collect inven
 switchdb.py  --  This script is used to manage sqlite database
 
 switchport_web.py -- Script holding flask front-end web logic to render HTML templates by leveraing information from database and handles inbound user requests as well. 
+
+**Installation:**
+
+1. Clone Repo
+2. Install requirements: pipenv install
+3. Edit config.yml to add end devices
+4. Create a cron job to run data_collector.py for preferred interval to poll end devices and update database for latest device details.
+5. Run switchport_web.py for the web portion
