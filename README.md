@@ -1,7 +1,7 @@
 # Switch_Dashboard_Web
 A web-server to display list of Switches in network along with their port capacity, number of ports used and display list of IP addresses used across the network.
 
-Project Components:
+**Project Components:**
 
 /templates/ -- All Jinja2/HTML templates are stored in this folder. Flash utilizes these templates to render web pages.
 
