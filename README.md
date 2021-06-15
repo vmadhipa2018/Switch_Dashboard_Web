@@ -9,8 +9,7 @@ Project Components:
 
 config.yml -- Configuration file to hold all the end device details (device_type, IP, Password etc.) that will be polled.
 
-data_collector.py -- Python script that connects to end devices to collect inventory, switchport information, Consumed IP details. This script parses the raw data and saves data   
-                     to sqlite database
+data_collector.py -- Python script that connects to end devices to collect inventory, switchport information, Consumed IP details. This script parses the raw data and saves data   to sqlite database.
 
 switchdb.py  --  This script is used to manage sqlite database
 
