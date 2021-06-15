@@ -8,6 +8,8 @@
       type="image/png" 
       href="static/cli.png">
    {% endblock %}
+</head>
+<body>
    {% block title %}
    {% if title %}
       {{ title }}
@@ -16,4 +18,5 @@
    {% endif %}
    {% endblock %}
    {% include 'nav.html' %}
-</head>
+   <div id="ips">{% block scripts %} {% endblock %}</div>
+</body>

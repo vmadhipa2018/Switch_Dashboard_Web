@@ -1,4 +1,4 @@
-{%- extends "base.html" %}
+{% extends "base.html" %}
 <body>
    {% block content %}
    <div class="row justify-content-between align-items-right">
@@ -17,7 +17,6 @@
             <h1>Current SwitchPort Availability</h1>
          </div>
       </div>
-   </div>
    <div class="container">
       <table class="table table-hover">
       <thead>
@@ -35,6 +34,7 @@
          </tr>
       </thead>
       <tbody>
+      <ul>
          {% for switch in switches %}
          <tr>
             {% if switch.serial == "Not Polled Yet" %}
@@ -64,7 +64,8 @@
                {% endif %}
                {% if switch.capacity >= 50 and switch.capacity < 75 %}
                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ switch.capacity }}%" aria-valuenow={{ switch.up }} aria-valuemin="0" aria-valuemax={{ switch.total }}>
-   </div>
+
+               </div>
    {% endif %}
    {% if switch.capacity >= 75 %}
    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ switch.capacity }}%" aria-valuenow={{ switch.up }} aria-valuemin="0" aria-valuemax={{ switch.total }}></div>
@@ -72,8 +73,38 @@
    </div>
    </td>
    </tr>
-   {% endfor %}		
-   </div>
+   {% endfor %}
+      </ul>
+      </table></div>
    {% endblock %}
+   </div>
+      {% block scripts %}
+		   <div class="container">
+      <div class="col-lg-12">
+         <div class="page-header">
+            <h1>Used IPs</h1>
+         </div>
+      </div>
+      <div class="container">
+         <table class="table table-hover">
+            <thead>
+               <tr>
+                  <th scope="col">Number</th>
+                  <th scope="col">Consumed IPs on the Network</th>
+               </tr>
+            </thead>
+            <tbody>
+            <span> Number of Used IPs in the Network is {{ consumed_ips|length }} IPs </span>
+            {% for each in consumed_ips %}
+               <tr>
+                  <td> {{ each.id }}</td>
+                  <td> {{ each.IP_ADDRESS }} </td>
+               </tr>
+            </tbody>
+         {% endfor %}
+         </table>
+      </div>
+      </div>
+   </div>
+      {% endblock %}
 </body>
-

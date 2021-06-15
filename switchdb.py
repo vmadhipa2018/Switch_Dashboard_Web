@@ -46,13 +46,54 @@ class DB:
             intmedsfp integer DEFAULT 0,
             intmedvirt integer DEFAULT 0
         ); """
+        CONSUMED_IPs_TABLE = """ CREATE TABLE IF NOT EXISTS IPs_USED (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            IP_ADDRESS INTEGER DEFAULT 1
+            );
+            """
+
         last_update_table = """ CREATE TABLE IF NOT EXISTS last_update (
             id integer NOT NULL PRIMARY KEY,
             lastrun text NOT NULL
         ); """
         cur = self.conn.cursor()
         cur.execute(sw_info_table)
+        cur.execute(CONSUMED_IPs_TABLE)
         cur.execute(last_update_table)
+
+    def add_used_ip(self,id, IP_ADDRESS):
+        """
+        Insert USED IP Addressese into DB
+        """
+        sql = """ INSERT OR IGNORE INTO IPs_USED(id,IP_ADDRESS) values(?,?);"""
+        cur = self.conn.cursor()
+        cur.execute(sql,(id,IP_ADDRESS))
+        self.conn.commit()
+        print("Adding Consumed IPs to the database")
+        return
+
+    def update_used_ip(self,id,IP_ADDRESS):
+        """
+        UPDATE IP USED Information
+        """
+        sql = """ UPDATE OR REPLACE IPs_USED SET 
+                  id = ?,
+                  IP_ADDRESS = ?;
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql,(id,IP_ADDRESS))
+        self.conn.commit()
+        return
+
+    def get_used_ip(self):
+        """
+        Retrieve Used IP information
+        """
+        sql = """ SELECT id, IP_ADDRESS FROM IPs_USED; """
+        cur = self.conn.cursor()
+        cur.execute(sql)
+        result = cur.fetchall()
+        return result
 
     def addSwitch(self, name, mgmt_ip):
         """
@@ -207,10 +248,7 @@ class DB:
                   WHERE id = 1;
         """
         now = datetime.now()
-        #print timezone along with time
-        localtime = reference.LocalTimezone()
-        localtime.tzname(now)
-        timestamp = now.strftime("%B, %d, %Y %H:%M:%S, " + localtime.tzname(now))
+        timestamp = now.strftime("%B, %d, %Y %H:%M:%S")
         cur = self.conn.cursor()
         cur.execute(sql, [timestamp])
         self.conn.commit()

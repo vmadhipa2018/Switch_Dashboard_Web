@@ -4,7 +4,7 @@ from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
 
 import switchdb
-import data_collector
+
 
 app = Flask(__name__)
 
@@ -16,9 +16,11 @@ def switch_inventory():
     """
     lastupdate = getLastUpdate()
     switchdata = getSwitchInfo()
+    used_ips = get_ip_list()
     return render_template('main.html',
                            switches=switchdata,
-                           lastupdate=lastupdate)
+                           lastupdate=lastupdate,
+                           consumed_ips = used_ips)
 
 
 @app.route('/<serial>', methods=['GET'])
@@ -59,14 +61,27 @@ def getLastUpdate():
     swDB.close()
     return lastupdate
 
-@app.route('/ip_list', methods=['GET'])
-def main():
-    #consumed_IPs = unique_ip_list()
-    return render_template('ip_list.html')
+# @app.route('/ip_list', methods=['GET'])
+def get_ip_list():
+    """
+    This page shows a summary of all IPs used
+    across the entire network
+    """
+    swDB = switchdb.DB()
+    ip_used_info = swDB.get_used_ip()
+    used_ips = []
+    for row in ip_used_info:
+        row = list(row)
+        ip = {}
+        ip['id'] = row[0]
+        ip['IP_ADDRESS'] = row[1]
+        used_ips.append(ip)
+    swDB.close()
+    return used_ips
 
 def getSwitchInfo():
     """
-    Query DB for summary info on all 
+    Query DB for summary info on all
     switches currently monitored
     """
     swDB = switchdb.DB()

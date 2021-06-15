@@ -218,6 +218,14 @@ def updateDB(device, ip, sysinfo, portinfo):
     swDB.updatePorts(device, ip, portinfo)
     swDB.close()
 
+def add_used_ips(id, IP_used):
+    """
+    Inset Used IP Addresses into the database
+    """
+    swDB = switchdb.DB()
+    print(f'Adding Used IPs in the network to Database')
+    swDB.add_used_ip(id,IP_used)
+    swDB.close()
 
 def updateLastRun():
     """
@@ -239,7 +247,7 @@ def updateCheckStatus(device, ip, status):
     swDB.updateStatus(device, ip, status)
     swDB.close()
 
-open("list_ip_300.txt", 'w+').close()            ##This will overwrite the file everytime getSystemInfoXE is run and avoids file from overgrowing.
+open("list_ip_300.txt", 'w+').close()            #This will overwrite the file everytime getSystemInfoXE is run and avoids txt file from overgrowing on local machine.
 def usedips(device):
     with open('list_ip_300.txt', 'a') as file:      ## Open/Create the file for saving IP List
         resp1 = device.send_command("show ip arp")
@@ -260,10 +268,15 @@ def csv_write(iteration,devicelist):
                 output.append(ip)
             unique_list = set(output)      #Remove Duplicate IP entries from the list. Since "Sh ip arp" is run on both switches, they might have similar IP entries.
             sorted_list = sorted(unique_list, key=lambda ip: struct.unpack("!L", inet_aton(ip))[0])  #Sort the IP address in Ascending Order
-            print(f'My sorted list is {sorted_list}')
+            id = 0
+            for each_ip in sorted_list:
+                id +=1
+                ips = each_ip
+                add_used_ips(id, ips)
         #
         #Below block of code will write the IP list to CSV file.
         tmp = [x for x in range(1,(len(sorted_list) + 1))]
+
         new_sort = [tmp,sorted_list]
         export_data = zip_longest(*new_sort, fillvalue='')
         with open('consumed_ips.csv', 'w', encoding="ISO-8859-1", newline='') as file:
@@ -305,7 +318,6 @@ def run():
         else:
             # Update DB if last check failed
             updateCheckStatus(device, ip, False)
-        #unique_ip_list()
         csv_write(iteration, devicelist)
    # Finally, update the last-run time!
     updateLastRun()
